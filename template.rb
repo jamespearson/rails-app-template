@@ -30,23 +30,56 @@ def pundit_setup
 
         rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
-        after_action :verify_authorized
         after_action :verify_policy_scoped
       
-
         def user_not_authorized
             flash[:alert] = "You are not authorized to perform this action."
             redirect_to(request.referrer || root_path)
-          end
+        end
         RUBY
     end
         
 end
+
+def devise_setup
+    generate "devise:install"
+    generate "devise", "User"
+
+    # Add mailer detail to development.rb
+    append_to_file 'config/environments/development.rb', after: "config.action_mailer.perform_caching = false\n" do
+        <<~RUBY
+        config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+        RUBY
+    end
+    
+    # Generate a placeholder home controller
+    generate :controller, "home", "index"
+    route "root to: 'home#index'"
+
+    # Add devise params to application controller
+    inject_into_file 'app/controllers/application_controller.rb', before: "after_action :verify_policy_scoped" do
+        <<~RUBY
+        after_action :verify_authorized
+        RUBY
+    end
+
+    inject_into_file 'app/controllers/application_controller.rb', before: /^end/ do
+        <<~RUBY
+            protected
+        
+            def configure_permitted_parameters
+                devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name, :last_name, :email])
+            end
+        RUBY
+    end
+end
+
 remove_file "public/index.html"
 remove_file "public/favicon.ico"
 remove_file "public/images/rails.png"
 remove_file "public/robots.txt"
 
+gem "devise"
 gem "pundit", "~> 2.3"
 gem "role_model"
 gem "sentry-ruby"
@@ -69,7 +102,13 @@ end
 gem_group :development do
     gem 'annotate'
 end
+
+
 after_bundle do
     rspec_setup
     pundit_setup
+    devise_setup
 end
+
+
+
