@@ -1,3 +1,14 @@
+def cleanup
+    run 'bundle exec standardrb --fix-unsafely'
+
+    # Remove a tailwindcss_spec generated 
+    remove_file "spec/views/home/index.html.tailwindcss_spec.rb"
+    
+    git :init
+    git add: '.'
+    git commit: %Q{ -m 'Initial setup using https://github.com/jamespearson/rails-app-template' }
+end
+
 def database_setup
     # Setup database
     run "rails db:create"
@@ -126,6 +137,10 @@ after_bundle do
     devise_setup
     roles_setup
     database_setup
+
+    cleanup
+
+    
 end
 
 
