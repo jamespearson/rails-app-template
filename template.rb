@@ -35,6 +35,14 @@ def devise_setup
             end
         RUBY
     end
+
+    # Skip Pundit checks on the HomeController
+    inject_into_file 'app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n" do
+        <<~RUBY
+        skip_after_action :verify_authorized
+        skip_after_action :verify_policy_scoped
+        RUBY
+    end
 end
 
 
