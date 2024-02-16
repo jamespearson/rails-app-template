@@ -60,6 +60,19 @@ def pundit_setup
         
 end
 
+def roles_setup
+    inject_into_class 'app/models/user.rb', 'User' do
+        <<~RUBY
+            include RoleModel
+            
+            roles_attribute :roles_mask
+            roles :admin, prefix: "is_"
+        RUBY
+    end
+
+    generate(:migration, "AddRolesMaskToUsers", "roles_mask:integer")
+end
+
 def rspec_setup
     generate "rspec:install"
 
@@ -116,7 +129,7 @@ after_bundle do
     rspec_setup
     pundit_setup
     devise_setup
-    
+    roles_setup
     database_setup
 end
 
