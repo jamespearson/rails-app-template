@@ -18,6 +18,30 @@ def rspec_setup
     
     directory "#{__dir__}/rspec/support", "rspec/support"
 end
+
+def pundit_setup
+    generate "pundit:install"
+    directory "#{__dir__}/app/policies","app/policies", force: true
+
+    # Add pundit to the application controller
+    inject_into_file 'app/controllers/application_controller.rb', after: "class ApplicationController < ActionController::Base\n" do
+        <<~RUBY
+        include Pundit::Authorization
+
+        rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+
+        after_action :verify_authorized
+        after_action :verify_policy_scoped
+      
+
+        def user_not_authorized
+            flash[:alert] = "You are not authorized to perform this action."
+            redirect_to(request.referrer || root_path)
+          end
+        RUBY
+    end
+        
+end
 remove_file "public/index.html"
 remove_file "public/favicon.ico"
 remove_file "public/images/rails.png"
@@ -47,4 +71,5 @@ gem_group :development do
 end
 after_bundle do
     rspec_setup
+    pundit_setup
 end
