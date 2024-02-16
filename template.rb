@@ -26,16 +26,6 @@ def devise_setup
         RUBY
     end
 
-    inject_into_file 'app/controllers/application_controller.rb', before: /^end/ do
-        <<~RUBY
-            protected
-        
-            def configure_permitted_parameters
-                devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name, :last_name, :email])
-            end
-        RUBY
-    end
-
     # Skip Pundit checks on the HomeController
     inject_into_file 'app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n" do
         <<~RUBY
