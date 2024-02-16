@@ -85,11 +85,8 @@ def rspec_setup
       RUBY
     end
 
-    dirname = File.basename(Dir.getwd)
-    puts "dirname: #{dirname}"
-    puts "__dir__: #{__dir__}"
-    
-    directory "#{__dir__}/rspec/support", "rspec/support"
+    dirname = File.basename(Dir.getwd)    
+    directory "#{__dir__}/spec/support", "spec/support"
 end
 
 
