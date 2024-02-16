@@ -1,4 +1,8 @@
-
+def database_setup
+    # Setup database
+    run "rails db:create"
+    run "rails db:migrate"
+end
 
 def devise_setup
     generate "devise:install"
